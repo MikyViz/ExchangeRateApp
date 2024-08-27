@@ -14,7 +14,8 @@ Future fetchExchangeRate(String fromCurrency, String toCurrency) async {
 
   try {
     var response;
-    if (toCurrency.isEmpty) { //? В этом блоке, есть противоречащие условия... но сука работает🤔
+    if (toCurrency.isEmpty) {
+      //? В этом блоке, есть противоречащие условия... но сука работает🤔
       response = await http.get(urlOverview);
     } else {
       response = await http.get(url);
@@ -94,7 +95,11 @@ class _MyHomePageState extends State<MyHomePage> {
         final data = jsonDecode(response.body)['data'];
         data.forEach((key, value) {
           setState(() {
-            currencies.add({'code': key, 'symbol': value['symbol_native'], 'name': value['name']});
+            currencies.add({
+              'code': key,
+              'symbol': value['symbol_native'],
+              'name': value['name']
+            });
           });
         });
         print(currencies);
@@ -121,20 +126,17 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           child: Center(
-            child: Expanded(
-              // width: 350,
-              // height: 380,
+            child: SizedBox(
+              width: 300,
+              height: 350,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  DropdownMenu(
-                    controller: myIconController,
-                    enableFilter: true,
-                    requestFocusOnTap: true,
-                    leadingIcon: Icon(Icons.account_balance_wallet),
-                    label: const Text('Your currency'),
-                    inputDecorationTheme: InputDecorationTheme(
+                  DropdownButtonFormField( 
+                    decoration: InputDecoration(
+                      labelText: 'Your currency',
+                      prefixIcon: Icon(Icons.wallet),
                       filled: true,
                       fillColor: const Color.fromARGB(205, 255, 255, 255),
                       contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -142,32 +144,19 @@ class _MyHomePageState extends State<MyHomePage> {
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      hintStyle: const TextStyle(
-                          color: Colors.deepPurple),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.white),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.deepPurple),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
                     ),
-                    onSelected: (currensy) {
+                    items: currencies.map<DropdownMenuItem<String>>((currency) {
+                      return DropdownMenuItem<String>(
+                        value: currency['code'],
+                        child: Text(
+                            '${currency['name']} ${currency['code']} ${currency['symbol']}'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
                       setState(() {
-                        mySelectedIcon = currensy['code'];
+                        mySelectedIcon = value;
                       });
                     },
-                    dropdownMenuEntries:
-                        currencies.map<DropdownMenuEntry>(
-                      (currency) {
-                        return DropdownMenuEntry(
-                          value: currency,
-                          label: '${currency['name']} ${currency['code']}  ${currency['symbol']}',
-                          // leadingIcon: currency['symbol'],
-                        );
-                      },
-                    ).toList(),
                   ),
                   const SizedBox(height: 24),
                   Padding(
@@ -187,48 +176,32 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  DropdownMenu(
-                    controller: targetIconController,
-                    enableFilter: true,
-                    requestFocusOnTap: true,
-                    leadingIcon: Icon(Icons.my_location),
-                    label: const Text('Target currency'),
-                    inputDecorationTheme: InputDecorationTheme(
+                  DropdownButtonFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Target currency',
+                      //add icon in labele
+                      prefixIcon: Icon(Icons.my_location),
                       filled: true,
                       fillColor: const Color.fromARGB(205, 255, 255, 255),
-
                       contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      hintStyle: const TextStyle(
-                          color: Colors.deepPurple),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.white),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Colors.deepPurple),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
                     ),
-                    onSelected: (currency) {
+                    items: currencies.map<DropdownMenuItem<String>>((currency) {
+                      return DropdownMenuItem<String>(
+                        value: currency['code'],
+                        child: Text(
+                            '${currency['name']} ${currency['code']} ${currency['symbol']}'),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
                       setState(() {
-                        targetSelectedIcon = currency['code'];
+                        targetSelectedIcon = value;
                       });
                     },
-                    dropdownMenuEntries: currencies.map<DropdownMenuEntry>(
-                      (currency) {
-                        return DropdownMenuEntry(
-                          value: currency,
-                          label: '${currency['name']}  ${currency['code']}  ${currency['symbol']}',
-                          // leadingIcon: Icon(icon.icon),
-                        );
-                      },
-                    ).toList(),
                   ),
-
                   //TODO: В будущем сделать поле для ввода суммы в целевой валюте и при вводе в одно из окон ввода, чтобы второе окно становилось недоступным
 
                   const SizedBox(height: 24),
@@ -239,11 +212,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(202, 104, 58, 183),
                         padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 24),
+                            vertical: 12, horizontal: 24),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       onPressed: () async {
@@ -284,25 +255,22 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: const Text(
                         'GO!',
                         style: TextStyle(
-                          color: Colors
-                              .white,
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
-                    width: 150, 
+                    width: 150,
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(202, 104, 58, 183),
                         padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 24),
+                            vertical: 12, horizontal: 24),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       onPressed: () async {
@@ -373,21 +341,16 @@ class OverviewRoute extends StatelessWidget {
                         // final name = currency['name'];
                         return Container(
                             margin: const EdgeInsets.symmetric(
-                                vertical: 5.0,
-                                horizontal: 10.0),
-                            padding: const EdgeInsets.all(
-                                10.0),
+                                vertical: 5.0, horizontal: 10.0),
+                            padding: const EdgeInsets.all(10.0),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(
-                                  0.8),
-                              borderRadius: BorderRadius.circular(
-                                  8.0),
+                              color: Colors.white.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(8.0),
                             ),
                             child: ListTile(
                               title: Text(
                                 '$currency: $rate', //TODO В перспективе сделать так, чтобы отображались и названия валют. Требует больших усилий чем кажется на первый взгляд, по тому, что возвращаемый с сервера ответ, не включает названия валют. Имена содержатся в ответе на запрос посылаемый при загрузке апликации.
-                                style: TextStyle(
-                                    color: Colors.black),
+                                style: TextStyle(color: Colors.black),
                               ),
                             ));
                       },
