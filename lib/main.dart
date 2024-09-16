@@ -219,7 +219,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(202, 104, 58, 183),
+                        backgroundColor:
+                            const Color.fromARGB(202, 104, 58, 183),
                         padding: const EdgeInsets.symmetric(
                             vertical: 12, horizontal: 24),
                         shape: RoundedRectangleBorder(
@@ -301,6 +302,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         data:
                                             exchangeRate, // *****Сука, здесь блядь ты нахуй передаешь аргументы в сраный овервью виджет нахуй.
                                         currencies: currencies,
+                                        myCurrency: mySelectedIcon!,
                                       )),
                             );
                           }
@@ -328,14 +330,27 @@ class _MyHomePageState extends State<MyHomePage> {
 class OverviewRoute extends StatelessWidget {
   final Map<String, dynamic> data;
   final List<Map<String, String>> currencies;
+  final String  myCurrency;
+
   const OverviewRoute(
-      {super.key, required this.data, required this.currencies});
+      {super.key,
+      required this.data,
+      required this.currencies,
+      required this.myCurrency});
+
 
   @override
   Widget build(BuildContext context) {
+      final Map<String, String> myCurrencyInfo = currencies.firstWhere(
+                          (currency) => currency['code'] == myCurrency,
+                          orElse: () => {
+                            'name': 'Unknown',
+                            'symbol': ''
+                          }, // На случай отсутствия данных
+                        );
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Rate overwiev🤑'),
+        title: Text('${myCurrencyInfo['name']} ${myCurrencyInfo['symbol']} ${myCurrencyInfo['code']}'),
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         ),
         body: Center(
@@ -357,7 +372,7 @@ class OverviewRoute extends StatelessWidget {
                         final currencyCode = data.keys.elementAt(index);
                         final rate = data[currencyCode];
 
-// Найди информацию о валюте по её коду
+                        // Найди информацию о валюте по её коду
                         final currencyInfo = currencies.firstWhere(
                           (currency) => currency['code'] == currencyCode,
                           orElse: () => {
