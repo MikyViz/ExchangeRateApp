@@ -3,8 +3,9 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+// TODO Разбить на функции и файлы, весь этот ахрененно длинный код!!!!
+
 Future fetchExchangeRate(String fromCurrency, String toCurrency) async {
-  //TODO ТИПИЗАЦИЯ!!!!! какой тип ожидается от функции? double? или обьект???
   const apiKey =
       'fca_live_PwKHMUvyTedGGvpShpMgfy4SDOKzhNCZQcUhAa31'; //! MUST TO USE ENV VARIABLES
   final url = Uri.parse(
@@ -13,26 +14,27 @@ Future fetchExchangeRate(String fromCurrency, String toCurrency) async {
       'https://api.freecurrencyapi.com/v1/latest?apikey=$apiKey&currencies=&base_currency=$fromCurrency');
 
   try {
-    var response;
+    http.Response response; // TODO have to understand wtf type of response ...
     if (toCurrency.isEmpty) {
-      //? В этом блоке, есть противоречащие условия... но сука работает🤔
       response = await http.get(urlOverview);
     } else {
       response = await http.get(url);
     }
-    print(response);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (toCurrency != '')
+      final data = jsonDecode(
+          response.body); // TODO have to understand wtf type of data ...
+
+      if (toCurrency != '') {
         return data['data'][toCurrency] as double?;
-      else
+      } else {
         return data['data'];
+      }
     } else {
       print('Failed to load exchange rate');
     }
   } catch (e) {
-    print('Error: $e');
+    print('🤦‍♂️Error: $e');
   }
   return null;
 }
@@ -43,11 +45,10 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Money?',
+      title: 'money sale!',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 70, 9, 103)),
@@ -68,16 +69,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Map<String, String>> currencies = [];
 
-  final TextEditingController myIconController = TextEditingController();
-  final TextEditingController targetIconController = TextEditingController();
-  final TextEditingController amountBaseController = TextEditingController();
+  // final TextEditingController myIconController = TextEditingController(); // TOdo Проверить, возможно нужно использовать
+  // final TextEditingController targetIconController = TextEditingController();
+  final TextEditingController amountBaseController =
+      TextEditingController(); // todo 👇to chack using of those var
   final TextEditingController amountTagetController = TextEditingController();
 
-  String? mySelectedIcon; // TODO Specify the type
-  String? targetSelectedIcon; // TODO Specify the type
+  String? mySelectedIcon;
+  String? targetSelectedIcon; // TODO  ☝️☝️☝️☝️☝️☝️☝️☝️☝️
 
   @override
   void initState() {
+    // Выполняет нижеуказанные команды при загрузке страници
     super.initState();
     fetchCurrencies();
   }
@@ -102,15 +105,16 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           });
         });
-        print(currencies);
       } else {
-        print('Failed to load currencies');
+        print(
+            'Failed to load currencies'); //todo выяснить про logging framework
       }
     } catch (e) {
       print('Error: $e');
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -133,10 +137,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  DropdownButtonFormField( 
+                  DropdownButtonFormField(
                     decoration: InputDecoration(
                       labelText: 'Your currency',
-                      prefixIcon: Icon(Icons.wallet),
+                      prefixIcon: const Icon(Icons.wallet),
                       filled: true,
                       fillColor: const Color.fromARGB(205, 255, 255, 255),
                       contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -147,14 +151,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     items: currencies.map<DropdownMenuItem<String>>((currency) {
                       return DropdownMenuItem<String>(
-                        value: currency['code'],
+                        value:
+                            currency['code'], //? what different from a child?
                         child: Text(
                             '${currency['name']} ${currency['code']} ${currency['symbol']}'),
                       );
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        mySelectedIcon = value;
+                        mySelectedIcon =
+                            value; // * Это СцуКа нада перадать в раут, мать его...
                       });
                     },
                   ),
@@ -168,6 +174,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         filled: true,
                         fillColor: Color.fromARGB(205, 255, 255, 255),
                         labelText: 'How many to change?',
+                        prefixIcon: Icon(Icons.shopping_basket),
+                        // prefixIcon: Icon(Icons.add_shopping_cart),
+                        // prefixIcon: Icon(Icons.price_change),
                         border: OutlineInputBorder(
                           borderSide: BorderSide.none,
                           borderRadius: BorderRadius.circular(8.0),
@@ -179,8 +188,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   DropdownButtonFormField(
                     decoration: InputDecoration(
                       labelText: 'Target currency',
-                      //add icon in labele
-                      prefixIcon: Icon(Icons.my_location),
+                      prefixIcon: Icon(Icons.add_shopping_cart),
+                      // prefixIcon: Icon(Icons.my_location),
                       filled: true,
                       fillColor: const Color.fromARGB(205, 255, 255, 255),
                       contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -225,27 +234,31 @@ class _MyHomePageState extends State<MyHomePage> {
                             targetSelectedIcon!,
                           );
                           if (exchangeRate != null) {
+                            final currentContext = context;
                             double amountInTargetCurrency =
                                 double.parse(amountBaseController.text) *
                                     exchangeRate;
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Exchange Rate'),
-                                  content: Text(
-                                      '${amountBaseController.text} ${mySelectedIcon!} =  $amountInTargetCurrency ${targetSelectedIcon!}'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            if (mounted) {
+                              showDialog(
+                                context:
+                                    currentContext, // todo лучше неиспользовать контекст, реши эту проблему, и разберись с тем, почему это проблемма.
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Exchange Rate'),
+                                    content: Text(
+                                        '${amountBaseController.text} ${mySelectedIcon!} =  $amountInTargetCurrency ${targetSelectedIcon!}'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
                           }
                         } else {
                           // TODO: Обработай случай, когда валюты не выбраны
@@ -266,7 +279,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(202, 104, 58, 183),
+                        backgroundColor:
+                            const Color.fromARGB(202, 104, 58, 183),
                         padding: const EdgeInsets.symmetric(
                             vertical: 12, horizontal: 24),
                         shape: RoundedRectangleBorder(
@@ -284,7 +298,9 @@ class _MyHomePageState extends State<MyHomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => OverviewRoute(
-                                        data: exchangeRate,
+                                        data:
+                                            exchangeRate, // *****Сука, здесь блядь ты нахуй передаешь аргументы в сраный овервью виджет нахуй.
+                                        currencies: currencies,
                                       )),
                             );
                           }
@@ -311,7 +327,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class OverviewRoute extends StatelessWidget {
   final Map<String, dynamic> data;
-  const OverviewRoute({super.key, required this.data});
+  final List<Map<String, String>> currencies;
+  const OverviewRoute(
+      {super.key, required this.data, required this.currencies});
 
   @override
   Widget build(BuildContext context) {
@@ -336,9 +354,18 @@ class OverviewRoute extends StatelessWidget {
                     child: ListView.builder(
                       itemCount: data.length,
                       itemBuilder: (context, index) {
-                        final currency = data.keys.elementAt(index);
-                        final rate = data[currency];
-                        // final name = currency['name'];
+                        final currencyCode = data.keys.elementAt(index);
+                        final rate = data[currencyCode];
+
+// Найди информацию о валюте по её коду
+                        final currencyInfo = currencies.firstWhere(
+                          (currency) => currency['code'] == currencyCode,
+                          orElse: () => {
+                            'name': 'Unknown',
+                            'symbol': ''
+                          }, // На случай отсутствия данных
+                        );
+
                         return Container(
                             margin: const EdgeInsets.symmetric(
                                 vertical: 5.0, horizontal: 10.0),
@@ -349,8 +376,8 @@ class OverviewRoute extends StatelessWidget {
                             ),
                             child: ListTile(
                               title: Text(
-                                '$currency: $rate', //TODO В перспективе сделать так, чтобы отображались и названия валют. Требует больших усилий чем кажется на первый взгляд, по тому, что возвращаемый с сервера ответ, не включает названия валют. Имена содержатся в ответе на запрос посылаемый при загрузке апликации.
-                                style: TextStyle(color: Colors.black),
+                                '${currencyInfo['name']} (${currencyInfo['symbol']}) - $currencyCode: $rate',
+                                style: const TextStyle(color: Colors.black),
                               ),
                             ));
                       },
