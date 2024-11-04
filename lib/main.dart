@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -124,8 +125,8 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: NetworkImage(
-                  'https://th.bing.com/th/id/OIG3.K0OamqqO347g5h4ZanEH?pid=ImgGn'),
+              image: AssetImage(
+                  '../public/HomeBG.jpg'),
               fit: BoxFit.cover,
             ),
           ),
@@ -172,9 +173,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Color.fromARGB(205, 255, 255, 255),
+                        fillColor: const Color.fromARGB(205, 255, 255, 255),
                         labelText: 'How many to change?',
-                        prefixIcon: Icon(Icons.shopping_basket),
+                        prefixIcon: const Icon(Icons.shopping_basket),
                         // prefixIcon: Icon(Icons.add_shopping_cart),
                         // prefixIcon: Icon(Icons.price_change),
                         border: OutlineInputBorder(
@@ -188,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   DropdownButtonFormField(
                     decoration: InputDecoration(
                       labelText: 'Target currency',
-                      prefixIcon: Icon(Icons.add_shopping_cart),
+                      prefixIcon: const Icon(Icons.add_shopping_cart),
                       // prefixIcon: Icon(Icons.my_location),
                       filled: true,
                       fillColor: const Color.fromARGB(205, 255, 255, 255),
